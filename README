@@ -1,1 +1,5 @@
 this repo will soon get updated with netlink socket communication between a kernel module and a user space program.
+
+
+
+using protocol number as 25 and type as NETLINK_USER_SPACE_COMM
