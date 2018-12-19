@@ -12,12 +12,16 @@ struct nlmsghdr *nlh;
 int ret=0;
 int main()
 {
-	int fd = socket(PF_NETLINK, SOCK_RAW, NETLINK_USER_SPACE_COMM);
+	int fd = socket(AF_NETLINK, SOCK_RAW, 31);
 	if(fd == -1)
 	{
 		perror("socket error\n");
 		return -1;
 	}
+	while(1)
+	{
+	sleep(3);
+
 	memset(&src_addr, 0, sizeof(src_addr));
 	src_addr.nl_family = AF_NETLINK;
 	src_addr.nl_pid = getpid();
@@ -36,15 +40,31 @@ int main()
 	nlh->nlmsg_len = NLMSG_SPACE(1024);
 	nlh->nlmsg_pid = getpid();
 	nlh->nlmsg_flags = 0;
-
-	strcpy(NLMSG_DATA(nlh), "Hello You");
+		strcpy(NLMSG_DATA(nlh), "Hello You");
 	iov.iov_base = (void *)nlh;
 	iov.iov_len = nlh->nlmsg_len;
 	msg.msg_name= (void *)&dest_addr;
 	msg.msg_namelen=sizeof(dest_addr);
 	msg.msg_iov=&iov;
 	msg.msg_iovlen = 1;
-	sendmsg(fd, &msg, 0);
+	ret =sendmsg(fd, &msg, 0);
+	if(ret == -1)
+	{
+		perror("sendmsg error\n");
+		return -1;
+	}
+	ret =recvmsg(fd, &msg, 0);
+	if(ret == -1)
+	{
+		perror("recvmsg error\n");
+		return -1;
+	}
+	printf("data from kernel %s\n",NLMSG_DATA(nlh));
+	}
+	close(fd);
+	return 0;
+
+	
 
 }
 
